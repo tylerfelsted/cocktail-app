@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% for drink in drinks %}
+            <div class="card" style="width: 18rem;">
+                <img src="{{drink['strDrinkThumb']}}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">{{drink['strDrink']}}</h5>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
