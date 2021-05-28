@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{drink_list.name}}</h1>
+<p>{{drink_list.description}}</p>
+{% for drink in drinks %}
+{% include 'drinks/drink_card.html' %}
+{% endfor %}
+{% endblock %}

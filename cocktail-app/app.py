@@ -4,7 +4,7 @@ import requests
 from flask import Flask, render_template, request, flash, redirect, session, g
 from models import db, connect_db, User, List, List_Drink
 from forms import UserForm, ListForm
-from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients
+from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients, extract_drinks
 
 
 API_BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
@@ -48,7 +48,7 @@ def register_user():
         flash(f"Registered {user.username}", "success")
         return redirect('/')
 
-    return render_template('new_user.html', form=form)
+    return render_template('users/register.html', form=form)
 
 @app.route('/login', methods=["GET", "POST"])
 def login_user():
@@ -65,7 +65,7 @@ def login_user():
         else:
             flash('Incorrect username/password', "danger")
 
-    return render_template('login.html', form=form)
+    return render_template('users/login.html', form=form)
 
 @app.route('/logout')
 def logout_user():
@@ -73,20 +73,26 @@ def logout_user():
     flash("Logged out!", "info")
     return redirect('/')
 
+@app.route('/users/<username>')
+def show_user_details(username):
+    if g.user.username == username:
+        user = User.query.get_or_404(username)
+        return render_template('users/details.html', user=user)
+
 @app.route('/drinks/search')
 def search_drinks():
     search = request.args.get('search')
     res = requests.get(f'{API_BASE_URL}/search.php?s={search}')
     drinks = res.json()['drinks']
 
-    return render_template('drinks.html', drinks=drinks)
+    return render_template('drinks/drinks.html', drinks=drinks)
 
 @app.route('/drinks/<int:drink_id>')
 def show_drink_details(drink_id):
     res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink_id}')
     drink = res.json()['drinks'][0]
     ingredients = extract_ingredients(drink)
-    return render_template('drink_details.html', drink=drink, ingredients=ingredients)
+    return render_template('drinks/details.html', drink=drink, ingredients=ingredients)
 
 @app.route('/lists/new', methods=["GET", "POST"])
 def show_list_form():
@@ -101,3 +107,9 @@ def show_list_form():
         return redirect('/')
 
     return render_template('list_form.html', form=form)
+
+@app.route('/lists/<int:list_id>')
+def show_list(list_id):
+    drink_list = List.query.get_or_404(list_id)
+    drinks = extract_drinks(drink_list)
+    return render_template('list_details.html', drink_list=drink_list, drinks=drinks)

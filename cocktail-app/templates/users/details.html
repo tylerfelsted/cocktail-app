@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h3>{{user.username}}</h3>
+<ul>
+    {% for list in user.lists %}
+    <li><a href="/lists/{{list.id}}">{{list.name}}</a></li>
+    {% endfor %}
+</ul>
+<a class="btn btn-primary" href="/lists/new">Make new list</a>
+{% endblock %}

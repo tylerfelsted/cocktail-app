@@ -4,14 +4,7 @@
 
 
 <form method="POST">
-    {{ form.hidden_tag() }}
-    {% for field in form if field.widget.input_type != 'hidden' %}
-        {% for error in field.errors %}
-            <span class="text-danger">{{ error }}</span>
-        {% endfor %}
-        {{field.label(class_="form-label")}}
-        {{field(class_="form-control")}}
-    {% endfor %}
+    {% include 'form.html' %}
     <button class="btn btn-primary">Create List</button>
 </form>
 {% endblock %}

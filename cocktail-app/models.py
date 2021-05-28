@@ -10,7 +10,7 @@ class User(db.Model):
     username = db.Column(db.String(15), primary_key=True)
     password = db.Column(db.Text, nullable=False)
 
-    lists = db.relationship('List')
+    lists = db.relationship('List', backref="user")
 
     def __repr__(self):
         return f"<Username: {self.username}>"
@@ -52,16 +52,26 @@ class List(db.Model):
     __tablename__ = "lists"
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.String(15), db.ForeignKey('users.username', ondelete="CASCADE"))
+    user_id = db.Column(db.String(15), db.ForeignKey('users.username', ondelete="CASCADE"), nullable=False)
     name = db.Column(db.String(15), nullable=False)
     description = db.Column(db.String(100))
+
+    drinks = db.relationship("Drink", secondary="lists_drinks", backref="lists")
 
 class List_Drink(db.Model):
     __tablename__ = "lists_drinks"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    list_id = db.Column(db.Integer, db.ForeignKey('lists.id', ondelete="CASCADE"))
-    drink_id = db.Column(db.Integer, nullable=False)
+    list_id = db.Column(db.Integer, db.ForeignKey('lists.id', ondelete="CASCADE"), nullable=False)
+    drink_id = db.Column(db.Integer, db.ForeignKey('drinks.id', ondelete="CASCADE"), nullable=False)
+
+class Drink(db.Model):
+    __tablename__ = "drinks"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    image_url = db.Column(db.Text, nullable=False)
+
 
 
 def connect_db(app):

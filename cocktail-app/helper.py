@@ -21,3 +21,13 @@ def extract_ingredients(drink):
             else:
                 ingredients.append(ingredient)
     return ingredients
+
+def extract_drinks(drink_list):
+    drinks = []
+    for drink in drink_list.drinks:
+        drinks.append({
+            "idDrink": drink.id,
+            "strDrink": drink.name,
+            "strDrinkThumb": drink.image_url
+        });
+    return drinks
