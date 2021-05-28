@@ -45,8 +45,8 @@ def register_user():
         user = User.signup(username, password)
         db.session.commit()
         do_login(user)
+        flash(f"Registered {user.username}", "success")
         return redirect('/')
-
 
     return render_template('new_user.html', form=form)
 
@@ -60,16 +60,17 @@ def login_user():
         user = User.authenticate(username, password)
         if user:
             do_login(user)
-            print('logged in!', user)
+            flash(f"Welcome, {user.username}!", "success")
+            return redirect('/')
         else:
-            print('login failed!')
-        return redirect('/')
+            flash('Incorrect username/password', "danger")
 
     return render_template('login.html', form=form)
 
 @app.route('/logout')
 def logout_user():
     do_logout()
+    flash("Logged out!", "info")
     return redirect('/')
 
 @app.route('/drinks/search')
@@ -87,4 +88,16 @@ def show_drink_details(drink_id):
     ingredients = extract_ingredients(drink)
     return render_template('drink_details.html', drink=drink, ingredients=ingredients)
 
+@app.route('/lists/new', methods=["GET", "POST"])
+def show_list_form():
+    form = ListForm()
+    print(form.validate_on_submit())
+    if form.validate_on_submit():
+        name = form.name.data
+        description = form.description.data
+        new_list = List(user_id=g.user.username, name=name, description=description)
+        db.session.add(new_list)
+        db.session.commit()
+        return redirect('/')
 
+    return render_template('list_form.html', form=form)
