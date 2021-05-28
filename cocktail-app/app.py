@@ -4,8 +4,9 @@ import requests
 from flask import Flask, render_template, request, flash, redirect, session, g
 from models import db, connect_db, User, List, List_Drink
 from forms import UserForm, ListForm
+from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients
 
-CURR_USER_KEY = "curr_user"
+
 API_BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
 
 app = Flask(__name__)
@@ -28,12 +29,6 @@ def add_user_to_g():
     else:
         g.user = None
 
-def do_login(user):
-    session[CURR_USER_KEY] = user.username
-
-def do_logout():
-    if CURR_USER_KEY in session:
-        del session[CURR_USER_KEY]
 
 @app.route('/')
 def show_home_page():
@@ -72,12 +67,24 @@ def login_user():
 
     return render_template('login.html', form=form)
 
+@app.route('/logout')
+def logout_user():
+    do_logout()
+    return redirect('/')
+
 @app.route('/drinks/search')
 def search_drinks():
     search = request.args.get('search')
     res = requests.get(f'{API_BASE_URL}/search.php?s={search}')
-
     drinks = res.json()['drinks']
 
-
     return render_template('drinks.html', drinks=drinks)
+
+@app.route('/drinks/<int:drink_id>')
+def show_drink_details(drink_id):
+    res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink_id}')
+    drink = res.json()['drinks'][0]
+    ingredients = extract_ingredients(drink)
+    return render_template('drink_details.html', drink=drink, ingredients=ingredients)
+
+
