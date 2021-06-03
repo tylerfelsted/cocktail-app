@@ -63,12 +63,12 @@ class List_Drink(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     list_id = db.Column(db.Integer, db.ForeignKey('lists.id', ondelete="CASCADE"), nullable=False)
-    drink_id = db.Column(db.Integer, db.ForeignKey('drinks.id', ondelete="CASCADE"), nullable=False)
+    drink_id = db.Column(db.Integer, db.ForeignKey('drinks.drink_id', ondelete="CASCADE"), nullable=False)
 
 class Drink(db.Model):
     __tablename__ = "drinks"
 
-    id = db.Column(db.Integer, primary_key=True)
+    drink_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.Text, nullable=False)
 

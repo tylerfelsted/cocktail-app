@@ -26,7 +26,7 @@ def extract_drinks(drink_list):
     drinks = []
     for drink in drink_list.drinks:
         drinks.append({
-            "idDrink": drink.id,
+            "idDrink": drink.drink_id,
             "strDrink": drink.name,
             "strDrinkThumb": drink.image_url
         });
