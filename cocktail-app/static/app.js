@@ -31,13 +31,18 @@ $(document).ready(function() {
 });
 
 async function callAxios() {
+    const data = {
+        "drink": drink,
+        "list": $(this).attr('id')
+    }
     if($(this).prop('checked')) {
-        const data = {
-            "drink": drink,
-            "list": $(this).attr('id')
-        }
         console.log(data);
-        const res = await axios.post('/api/lists/add', data);
+        const res = await axios.post('/api/lists/add-drink', data);
+        console.log(res);
+    } else {
+        console.log(data);
+        const res = await axios.post('/api/lists/remove-drink', data);
         console.log(res);
     }
+    
 }

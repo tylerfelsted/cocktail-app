@@ -4,7 +4,7 @@ import requests
 from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
 from models import db, connect_db, User, List, List_Drink, Drink
 from forms import UserForm, ListForm
-from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients, extract_drinks
+from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients, extract_drinks, process_drink
 
 
 API_BASE_URL = "https://www.thecocktaildb.com/api/json/v1/1"
@@ -115,26 +115,15 @@ def show_list(list_id):
     return render_template('list_details.html', drink_list=drink_list, drinks=drinks)
 
 
-@app.route('/api/lists/add', methods=["POST"])
-def axios_test():
-    data = {
-        'drink': request.json['drink'],
-        'list_id': request.json['list']
-    }
+@app.route('/api/lists/add-drink', methods=["POST"])
+def add_drink_to_list():
+    process_drink(request.json, 'add')
+    return 'success'
 
-    drink = request.json['drink']
-
-    if not Drink.query.get(drink['id']):
-        new_drink = Drink(drink_id=drink['id'], name=drink['name'], image_url=drink['image'])
-        db.session.add(new_drink)
-        db.session.commit()
-    
-    drinks = List.query.get(data['list_id']).drinks
-    if not int(drink['id']) in [drink.drink_id for drink in drinks]:
-        list_drink = List_Drink(list_id=data['list_id'], drink_id=drink['id'])
-        db.session.add(list_drink)
-        db.session.commit()
-    return jsonify(data)
+@app.route('/api/lists/remove-drink', methods=["POST"])
+def remove_drink_from_list():
+    process_drink(request.json, 'remove')
+    return 'success'
 
 @app.route('/api/drinks/<int:drink_id>')
 def get_drink_info(drink_id):
