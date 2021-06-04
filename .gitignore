@@ -1,2 +1,3 @@
 cocktail-app/venv/
 cocktail-app/__pycache__/
+cocktail-app/tests/__pycache__/
