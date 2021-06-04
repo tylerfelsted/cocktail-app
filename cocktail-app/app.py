@@ -96,6 +96,9 @@ def show_drink_details(drink_id):
 
 @app.route('/lists/new', methods=["GET", "POST"])
 def show_list_form():
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
     form = ListForm()
     print(form.validate_on_submit())
     if form.validate_on_submit():
@@ -104,12 +107,15 @@ def show_list_form():
         new_list = List(user_id=g.user.username, name=name, description=description)
         db.session.add(new_list)
         db.session.commit()
-        return redirect('/')
+        return redirect(f'/users/{g.user.username}')
 
     return render_template('list_form.html', form=form)
 
 @app.route('/lists/<int:list_id>')
 def show_list(list_id):
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
     drink_list = List.query.get_or_404(list_id)
     drinks = extract_drinks(drink_list)
     return render_template('list_details.html', drink_list=drink_list, drinks=drinks)
@@ -133,4 +139,4 @@ def get_drink_info(drink_id):
             "lists": [list_element.id for list_element in drink.lists]
         }
         return jsonify(drink_lists)
-    return "Nothing "
+    return "Nothing"

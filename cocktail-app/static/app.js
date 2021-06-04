@@ -4,7 +4,7 @@ $(document).ready(function() {
     console.log("hello!");
     
     const myModal = new bootstrap.Modal($("#exampleModal"));
-    $(".list-button").click(async function(e) {
+    $(".list-button").click(async function() {
         console.log("open modal");
         drink['id'] = this.dataset.id;
         drink['name'] = this.dataset.name;
