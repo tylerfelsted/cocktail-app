@@ -3,7 +3,7 @@
 {% block content %}
 <h1>{{drink_list.name}}</h1>
 <p>{{drink_list.description}}</p>
-<a href="/lists/{{drink_list.id}}/ingredients">Generate ingredients list</a>
+<a href="/lists/{{drink_list.id}}/ingredients" class="btn btn-large btn-primary mb-3">Generate ingredients list</a>
 
 {% include 'drinks/drink_card.html' %}
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h3>{{user.username}}</h3>
+<h1>{{user.username}}</h1>
 <ul>
     {% for list in user.lists %}
     <li><a href="/lists/{{list.id}}">{{list.name}}</a></li>
