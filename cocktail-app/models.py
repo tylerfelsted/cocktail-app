@@ -5,6 +5,7 @@ bcrypt = Bcrypt()
 db = SQLAlchemy()
 
 class User(db.Model):
+    """User Model. Contains a username and an encrypted password"""
     __tablename__ = "users"
 
     username = db.Column(db.String(15), primary_key=True)
@@ -49,6 +50,7 @@ class User(db.Model):
         return False
 
 class List(db.Model):
+    """List model. Contains an id, a user id to identify which user the list belongs to, a name, and a description."""
     __tablename__ = "lists"
     
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -59,6 +61,7 @@ class List(db.Model):
     drinks = db.relationship("Drink", secondary="lists_drinks", backref="lists")
 
 class List_Drink(db.Model):
+    """A join table which shows which drinks are in which lists"""
     __tablename__ = "lists_drinks"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -66,6 +69,7 @@ class List_Drink(db.Model):
     drink_id = db.Column(db.Integer, db.ForeignKey('drinks.drink_id', ondelete="CASCADE"), nullable=False)
 
 class Drink(db.Model):
+    """Drink Model. Contains the id for the drink found in TheCocktailDB"""
     __tablename__ = "drinks"
 
     drink_id = db.Column(db.Integer, primary_key=True)
@@ -81,10 +85,7 @@ class Drink(db.Model):
 
 
 def connect_db(app):
-    """Connect this database to provided Flask app.
-
-    You should call this in your Flask app.
-    """
+    """Connect the db to the Flask app"""
 
     db.app = app
     db.init_app(app)

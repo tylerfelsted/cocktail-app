@@ -6,13 +6,17 @@ from sqlalchemy.exc import IntegrityError
 CURR_USER_KEY = "curr_user"
 
 def do_login(user):
+    """Adds the current user to the session"""
     session[CURR_USER_KEY] = user.username
 
 def do_logout():
+    """Removes the current user from the session"""
     if CURR_USER_KEY in session:
         del session[CURR_USER_KEY]
 
 def extract_ingredients(drink, with_measures):
+    """Creates a list of ingredients required to make a drink.
+    Unless measure is not present, or specifically excluded, it will prepend the ingredient with a measure"""
     ingredients = []
     for i in range(15):
         ingredient = drink[f'strIngredient{i+1}']
@@ -25,6 +29,7 @@ def extract_ingredients(drink, with_measures):
     return ingredients
 
 def extract_drinks(drink_list):
+    """Returns the id, name, and image for each drink in a list"""
     drinks = []
     for drink in drink_list.drinks:
         drinks.append({
@@ -35,6 +40,7 @@ def extract_drinks(drink_list):
     return drinks
 
 def process_drink(json, action):
+    """Either adds or removes a drink from a list, depending on the action specified"""
     data = {
         'drink': json['drink'],
         'list_id': json['list']
@@ -46,6 +52,7 @@ def process_drink(json, action):
 
 
 def add_drink(data):
+    """Adds a drink to a list. Will add the drink to the local db if it is not already present"""
     drink = data['drink']
     if not Drink.query.get(drink['drink_id']):
         try:
@@ -71,6 +78,7 @@ def add_drink(data):
     }
 
 def remove_drink(data):
+    """Removes a drink from a list"""
     drink = data['drink']
     drinks = List.query.get(data['list_id']).drinks
     if int(drink['drink_id']) in [drink.drink_id for drink in drinks]:

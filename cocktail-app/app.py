@@ -25,6 +25,7 @@ connect_db(app)
 
 @app.before_request
 def add_user_to_g():
+    """Adds the current logged in user to the flask global to allow for authorization"""
     if CURR_USER_KEY in session:
         g.user = User.query.get(session[CURR_USER_KEY])
     else:
@@ -33,6 +34,8 @@ def add_user_to_g():
 
 @app.route('/')
 def show_home_page():
+    """Displays the home page. Displays links to register or login if no user is currently logged in.
+    Otherwise it displays a random assortment of cocktails"""
     if g.user:
         drinks = []
         for i in range(10):
@@ -63,7 +66,7 @@ def register_user():
 
 @app.route('/login', methods=["GET", "POST"])
 def login_user():
-
+    """Logs in a user"""
     form = UserForm()
     if form.validate_on_submit():
         username = form.username.data
@@ -80,18 +83,21 @@ def login_user():
 
 @app.route('/logout')
 def logout_user():
+    """Logs out a user"""
     do_logout()
     flash("Logged out!", "info")
     return redirect('/')
 
 @app.route('/users/<username>')
 def show_user_details(username):
+    """Displays a users username and all of the drinks lists they have created"""
     if g.user.username == username:
         user = User.query.get_or_404(username)
         return render_template('users/details.html', user=user)
 
 @app.route('/drinks/search')
 def search_drinks():
+    """Allows a user to search TheCocktailDB for any cocktail"""
     search = request.args.get('search')
     res = requests.get(f'{API_BASE_URL}/search.php?s={search}')
     drinks = res.json()['drinks']
@@ -100,6 +106,7 @@ def search_drinks():
 
 @app.route('/drinks/<int:drink_id>')
 def show_drink_details(drink_id):
+    """Displays details on any cocktail, including its name, an image, ingredients and directions for making it."""
     res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink_id}')
     drink = res.json()['drinks'][0]
     ingredients = extract_ingredients(drink, True)
@@ -107,6 +114,7 @@ def show_drink_details(drink_id):
 
 @app.route('/lists/new', methods=["GET", "POST"])
 def show_list_form():
+    """Displays a form for creating a new list"""
     if not g.user:
         flash("Access unauthorized.", "danger")
         return redirect("/")
@@ -124,6 +132,7 @@ def show_list_form():
 
 @app.route('/lists/<int:list_id>')
 def show_list(list_id):
+    """Shows a lists name and description, as well as any drinks a user had added to it"""
     drink_list = List.query.get_or_404(list_id)
     if g.user.username != drink_list.user.username:
         flash("Access unauthorized.", "danger")
@@ -134,12 +143,12 @@ def show_list(list_id):
 
 @app.route('/lists/<int:list_id>/ingredients')
 def show_list_ingredients(list_id):
+    """Shows a list of ingredients required to make all the drinks in a given list"""
     drink_list = List.query.get_or_404(list_id)
     if g.user.username != drink_list.user.username:
         flash("Access unauthorized.", "danger")
         return redirect("/")
     all_ingredients = []
-    print(drink_list.drinks)
     for drink in drink_list.drinks:
         print(drink.drink_id)
         res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink.drink_id}')
@@ -147,8 +156,6 @@ def show_list_ingredients(list_id):
         ingredients = extract_ingredients(drink, False)
         for ingredient in ingredients:
             all_ingredients.append(ingredient)
-    
-    print(set(all_ingredients))
     return render_template("list_ingredients.html", ingredients=set(all_ingredients), drink_list=drink_list)
     
 
@@ -156,11 +163,13 @@ def show_list_ingredients(list_id):
 #-----------------API ROUTES------------------------
 @app.route('/api/lists/add-drink', methods=["POST"])
 def add_drink_to_list():
+    """Adds a specified drink, to a specified list"""
     res = process_drink(request.json, 'add')
     return jsonify(res)
 
 @app.route('/api/lists/remove-drink', methods=["POST"])
 def remove_drink_from_list():
+    """Removes a specified drink from a specified list"""
     res = process_drink(request.json, 'remove')
     return jsonify(res)
 
