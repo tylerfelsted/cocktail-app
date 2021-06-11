@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Ingredients required to make all the drinks in the {{drink_list.name}} list</h2>
+<ul>
+    {% for ingredient in ingredients %}
+    <li>{{ingredient}}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

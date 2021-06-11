@@ -2,6 +2,7 @@ import os
 import requests
 
 from flask import Flask, render_template, request, flash, redirect, session, g, jsonify
+from sqlalchemy.exc import IntegrityError
 from models import db, connect_db, User, List, List_Drink, Drink
 from forms import UserForm, ListForm
 from helper import CURR_USER_KEY, do_login, do_logout, extract_ingredients, extract_drinks, process_drink
@@ -32,7 +33,13 @@ def add_user_to_g():
 
 @app.route('/')
 def show_home_page():
-    return render_template("index.html")
+    if g.user:
+        drinks = []
+        for i in range(10):
+            res = requests.get(f'{API_BASE_URL}/random.php')
+            drinks.append(res.json()['drinks'][0])
+        return render_template("home.html", drinks=drinks)
+    return render_template("home-anon.html")
 
 @app.route('/register', methods=["GET", "POST"])
 def register_user():
@@ -42,8 +49,12 @@ def register_user():
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
-        user = User.signup(username, password)
-        db.session.commit()
+        try:
+            user = User.signup(username, password)
+            db.session.commit()
+        except IntegrityError:
+            flash("Username already taken", 'danger')
+            return render_template('users/register.html', form=form)
         do_login(user)
         flash(f"Registered {user.username}", "success")
         return redirect('/')
@@ -85,13 +96,13 @@ def search_drinks():
     res = requests.get(f'{API_BASE_URL}/search.php?s={search}')
     drinks = res.json()['drinks']
 
-    return render_template('drinks/drinks.html', drinks=drinks)
+    return render_template('drinks/search_drinks.html', drinks=drinks, search=search)
 
 @app.route('/drinks/<int:drink_id>')
 def show_drink_details(drink_id):
     res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink_id}')
     drink = res.json()['drinks'][0]
-    ingredients = extract_ingredients(drink)
+    ingredients = extract_ingredients(drink, True)
     return render_template('drinks/details.html', drink=drink, ingredients=ingredients)
 
 @app.route('/lists/new', methods=["GET", "POST"])
@@ -113,30 +124,54 @@ def show_list_form():
 
 @app.route('/lists/<int:list_id>')
 def show_list(list_id):
-    if not g.user:
+    drink_list = List.query.get_or_404(list_id)
+    if g.user.username != drink_list.user.username:
         flash("Access unauthorized.", "danger")
         return redirect("/")
-    drink_list = List.query.get_or_404(list_id)
+    
     drinks = extract_drinks(drink_list)
     return render_template('list_details.html', drink_list=drink_list, drinks=drinks)
 
+@app.route('/lists/<int:list_id>/ingredients')
+def show_list_ingredients(list_id):
+    drink_list = List.query.get_or_404(list_id)
+    if g.user.username != drink_list.user.username:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+    all_ingredients = []
+    print(drink_list.drinks)
+    for drink in drink_list.drinks:
+        print(drink.drink_id)
+        res = requests.get(f'{API_BASE_URL}/lookup.php?i={drink.drink_id}')
+        drink = res.json()['drinks'][0]
+        ingredients = extract_ingredients(drink, False)
+        for ingredient in ingredients:
+            all_ingredients.append(ingredient)
+    
+    print(set(all_ingredients))
+    return render_template("list_ingredients.html", ingredients=set(all_ingredients), drink_list=drink_list)
+    
 
+
+#-----------------API ROUTES------------------------
 @app.route('/api/lists/add-drink', methods=["POST"])
 def add_drink_to_list():
-    process_drink(request.json, 'add')
-    return 'success'
+    res = process_drink(request.json, 'add')
+    return jsonify(res)
 
 @app.route('/api/lists/remove-drink', methods=["POST"])
 def remove_drink_from_list():
-    process_drink(request.json, 'remove')
-    return 'success'
+    res = process_drink(request.json, 'remove')
+    return jsonify(res)
 
 @app.route('/api/drinks/<int:drink_id>')
 def get_drink_info(drink_id):
+    """Returns the lists that a drink belongs to"""
     drink = Drink.query.get(drink_id)
+    drink_lists={
+        "lists": []
+    }
     if drink:
-        drink_lists = {
-            "lists": [list_element.id for list_element in drink.lists]
-        }
-        return jsonify(drink_lists)
-    return "Nothing"
+        drink_lists["lists"] = [list_element.id for list_element in drink.lists]
+    return jsonify(drink_lists)
+    

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if not drinks %}
+    <p>No drinks found for search term '{{search}}'</p>
+{% else %}
+    <p>Search Results for '{{search}}'</p>
+    {% include 'drinks/drink_card.html' %}
+{% endif %}
+{% endblock %}

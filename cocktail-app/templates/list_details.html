@@ -3,11 +3,7 @@
 {% block content %}
 <h1>{{drink_list.name}}</h1>
 <p>{{drink_list.description}}</p>
-<div class="container">
-    <div class="row">
-        {% for drink in drinks %}
-        {% include 'drinks/drink_card.html' %}
-        {% endfor %}
-    </div>
-</div>
+<a href="/lists/{{drink_list.id}}/ingredients">Generate ingredients list</a>
+
+{% include 'drinks/drink_card.html' %}
 {% endblock %}

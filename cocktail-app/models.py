@@ -72,6 +72,12 @@ class Drink(db.Model):
     name = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.Text, nullable=False)
 
+    def serialize(self):
+        return {
+            'drink_id': self.drink_id,
+            'name': self.name,
+            'image_url': self.image_url
+        }
 
 
 def connect_db(app):

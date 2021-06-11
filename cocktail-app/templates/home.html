@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Welcome, {{g.user.username}}</h1>
+
+    <p>Here is a random selection of drinks to get you started.</p>
+    {% include 'drinks/drink_card.html' %}
+{% endblock %}

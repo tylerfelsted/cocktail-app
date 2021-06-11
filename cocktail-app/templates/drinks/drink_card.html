@@ -1,8 +1,14 @@
-<div class="card" style="width: 18rem;">
-  <img src="{{drink['strDrinkThumb']}}" class="card-img-top">
-  <div class="card-body">
-    <h5 class="card-title">{{drink['strDrink']}}</h5>
-    <a href="/drinks/{{drink['idDrink']}}" class="btn btn-primary">Details</a>
-    <button class="btn btn-primary list-button" data-id="{{drink['idDrink']}}" data-name="{{drink['strDrink']}}" data-image="{{drink['strDrinkThumb']}}" >Add to List</button>
+<div class="container">
+  <div class="row">
+    {% for drink in drinks %}
+    <div class="card" style="width: 18rem;">
+      <img src="{{drink['strDrinkThumb']}}" class="card-img-top">
+      <div class="card-body">
+        <h5 class="card-title">{{drink['strDrink']}}</h5>
+        <a href="/drinks/{{drink['idDrink']}}" class="btn btn-primary">Details</a>
+        <button class="btn btn-primary list-button" data-id="{{drink['idDrink']}}" data-name="{{drink['strDrink']}}" data-image="{{drink['strDrinkThumb']}}" >Add to List</button>
+      </div>
+    </div>
+    {% endfor %}
   </div>
 </div>
